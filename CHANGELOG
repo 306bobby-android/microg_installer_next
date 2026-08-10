@@ -1,2 +1,4 @@
+- Support microG v0.3.16
+- Add android.permission.PROVIDE_REMOTE_CREDENTIALS and PROVIDE_DEFAULT_ENABLED_CREDENTIAL_SERVICE to privapp permissions
 - Support microG v0.3.4
 - fix Play Store mkdir path (thanks to @MugoSquero), may fix #171

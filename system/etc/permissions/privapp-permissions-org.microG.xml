@@ -12,6 +12,8 @@
         <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
         <permission name="android.permission.MANAGE_USB" />
         <permission name="android.permission.START_ACTIVITIES_FROM_BACKGROUND" />
+        <permission name="android.permission.PROVIDE_REMOTE_CREDENTIALS" />
+        <permission name="android.permission.PROVIDE_DEFAULT_ENABLED_CREDENTIAL_SERVICE" />
     </privapp-permissions>
     <!-- For real Play Store; Fake Store will not use all except one (FAKE_PACKAGE_SIGNATURE) of them -->
     <privapp-permissions package="com.android.vending">
