@@ -19,81 +19,7 @@ if [ -f /data/adb/Phonesky.apk ]; then
     ui_print "- INFO: It won't break anything, but having that there won't make you use real Play Store anymore."
 fi
 
-mmm_exec showLoading
-ui_print "Collecting information about com.google.android.gms"
-# check microG
-DUMP_GMS="$(pm dump com.google.android.gms)"
-if [[ $? -gt 0 ]]; then
-    ui_print "- WARNING: pm dump may have failed?"
-fi
-ui_print "Checking if com.google.android.gms is installed"
-if (echo "$DUMP_GMS" | grep "Unable to find package: com.google.android.gms") >/dev/null; then
-    abort "- ERROR: You do not have official microG installed."
-fi
-ui_print "Collecting file path of com.google.android.gms"
-GMS_PATH="$(realpath $(echo "$DUMP_GMS" | grep path: | head -n1 | cut -d: -f2))"
-ui_print "Checking if file path of com.google.android.gms is on /data"
-if [[ "$GMS_PATH" = "${GMS_PATH#/data/}" ]]; then
-    abort "- ERROR: expected microG install path to be on /data, but it's $GMS_PATH"
-fi
-ui_print "Checking if file path of com.google.android.gms exists"
-if ! [[ -f "$GMS_PATH" ]]; then
-    abort "- ERROR: expected microG install path to exist: $GMS_PATH"
-fi
-ui_print "Checking if com.google.android.gms is microG"
-if ! (echo "$DUMP_GMS" | grep "android.permission.FAKE_PACKAGE_SIGNATURE") >/dev/null; then
-    abort "- ERROR: You appear to have Google Play Services installed instead of microG."
-fi
-ui_print "Checking if com.google.android.gms is a supported version"
-GMS_VER="$(echo "$DUMP_GMS" | grep versionCode | head -n1 | cut -d" " -f5 | cut -d= -f2)"
-GMS_VERN="$(echo "$DUMP_GMS" | grep versionName | head -n1 | cut -d" " -f5 | cut -d= -f2)"
-if [[ "$GMS_VER" -gt "$MAX_VER" ]]; then
-    abort "- ERROR: You have microG version $GMS_VERN ($GMS_VER) but the maximum supported version is $MAX_VERN ($MAX_VER)."
-fi
-# check Vending
-ui_print "Collecting information about com.android.vending"
-DUMP_VD="$(pm dump com.android.vending)"
-if [[ $? -gt 0 ]]; then
-    ui_print "- WARNING: pm dump may have failed?"
-fi
-ui_print "Checking if com.android.vending is installed"
-if (echo "$DUMP_VD" | grep "Unable to find package: com.android.vending") >/dev/null; then
-    abort "- ERROR: You do not have microG Companion or Play Store installed."
-fi
-ui_print "Collecting file path of com.android.vending"
-VD_PATH="$(realpath $(echo "$DUMP_VD" | grep path: | head -n1 | cut -d: -f2))"
-ui_print "Checking if file path of com.android.vending is on /data"
-if [[ "$VD_PATH" = "${VD_PATH#/data/}" ]]; then
-    abort "- ERROR: expected microG Companion / Play Store install path to be on /data, but it's $VD_PATH"
-fi
-ui_print "Checking if file path of com.android.vending exists"
-if ! [[ -f "$VD_PATH" ]]; then
-    abort "- ERROR: expected microG Companion / Play Store install path to exist: $VD_PATH"
-fi
-# Do install tasks
-ui_print "- Installing microG GmsCore"
-if [ ! -d "/my_bigball/priv-app/GmsCore" ]; then
-  mkdir -p "$MODPATH/system/product/priv-app/GmsCore"
-  cp "$GMS_PATH" "$MODPATH/system/product/priv-app/GmsCore/GmsCore.apk"
-else
-  mkdir -p "$MODPATH/system/priv-app/microG"
-  cp "$GMS_PATH" "$MODPATH/system/priv-app/microG/microG.apk"
-fi
-if (echo "$DUMP_VD" | grep "android.permission.FAKE_PACKAGE_SIGNATURE") >/dev/null; then
-  ui_print "- Installing microG Companion"
-  pm grant com.android.vending android.permission.FAKE_PACKAGE_SIGNATURE 2>/dev/null
-  ui_print "Installing microG Companion"
-else
-  ui_print "- Installing Play Store"
-fi
-if ! [ -d "/my_bigball/priv-app/GmsCore" ]; then
-  mkdir -p "$MODPATH/system/product/priv-app/Phonesky"
-  cp "$VD_PATH" "$MODPATH/system/product/priv-app/Phonesky/Phonesky.apk"
-else
-  mkdir -p "$MODPATH/system/priv-app/Phonesky"
-  cp "$VD_PATH" "$MODPATH/system/priv-app/Phonesky/Phonesky.apk"
-fi
-
+# Helper: Keycheck for Volume Keys
 keycheck() {
   local num=""
   while true; do
@@ -106,23 +32,153 @@ keycheck() {
   done
 }
 
-ui_print "*************************************************"
-ui_print " Install microG Updater app?"
-ui_print "   Vol Up   = Yes"
-ui_print "   Vol Down = No"
-ui_print "*************************************************"
-if keycheck; then
-  ui_print "- Installing microG Updater app"
+install_updater_app() {
+  ui_print "- Installing / Updating microG Updater app..."
+  local SRC_APK=""
+  if [ -f "$TMPDIR/system/product/priv-app/microGUpdater/microGUpdater.apk" ]; then
+    SRC_APK="$TMPDIR/system/product/priv-app/microGUpdater/microGUpdater.apk"
+  elif [ -f "$TMPDIR/system/priv-app/microGUpdater/microGUpdater.apk" ]; then
+    SRC_APK="$TMPDIR/system/priv-app/microGUpdater/microGUpdater.apk"
+  elif [ -f "$MODPATH/system/product/priv-app/microGUpdater/microGUpdater.apk" ]; then
+    SRC_APK="$MODPATH/system/product/priv-app/microGUpdater/microGUpdater.apk"
+  elif [ -f "$MODPATH/system/priv-app/microGUpdater/microGUpdater.apk" ]; then
+    SRC_APK="$MODPATH/system/priv-app/microGUpdater/microGUpdater.apk"
+  elif [ -n "$ZIPFILE_PATH" ] && [ -f "$ZIPFILE_PATH/system/priv-app/microGUpdater/microGUpdater.apk" ]; then
+    SRC_APK="$ZIPFILE_PATH/system/priv-app/microGUpdater/microGUpdater.apk"
+  fi
+
   if [ ! -d "/my_bigball/priv-app/GmsCore" ]; then
     mkdir -p "$MODPATH/system/product/priv-app/microGUpdater"
-    cp -f "$ZIPFILE_PATH/system/product/priv-app/microGUpdater/microGUpdater.apk" "$MODPATH/system/product/priv-app/microGUpdater/microGUpdater.apk" 2>/dev/null || true
+    if [ -n "$SRC_APK" ] && [ -f "$SRC_APK" ]; then
+      cp -f "$SRC_APK" "$MODPATH/system/product/priv-app/microGUpdater/microGUpdater.apk"
+    fi
   else
     mkdir -p "$MODPATH/system/priv-app/microGUpdater"
-    cp -f "$ZIPFILE_PATH/system/priv-app/microGUpdater/microGUpdater.apk" "$MODPATH/system/priv-app/microGUpdater/microGUpdater.apk" 2>/dev/null || true
+    if [ -n "$SRC_APK" ] && [ -f "$SRC_APK" ]; then
+      cp -f "$SRC_APK" "$MODPATH/system/priv-app/microGUpdater/microGUpdater.apk"
+    fi
   fi
-else
-  ui_print "- Skipping microG Updater app installation"
+}
+
+remove_updater_app() {
+  ui_print "- Removing microG Updater app from module."
   rm -rf "$MODPATH/system/priv-app/microGUpdater" "$MODPATH/system/product/priv-app/microGUpdater" 2>/dev/null || true
+}
+
+prompt_updater() {
+  local prompt_title="$1"
+  ui_print "*************************************************"
+  ui_print " $prompt_title"
+  ui_print "   Vol Up   = Yes (Install microG Updater)"
+  ui_print "   Vol Down = No  (Skip microG Updater)"
+  ui_print "*************************************************"
+  if keycheck; then
+    install_updater_app
+  else
+    remove_updater_app
+  fi
+}
+
+perform_microg_copy() {
+  DUMP_GMS="$(pm dump com.google.android.gms 2>/dev/null)"
+  if [ -n "$DUMP_GMS" ] && ! (echo "$DUMP_GMS" | grep "Unable to find package: com.google.android.gms") >/dev/null; then
+    GMS_PATH="$(realpath $(echo "$DUMP_GMS" | grep path: | head -n1 | cut -d: -f2) 2>/dev/null)"
+    if [ -n "$GMS_PATH" ] && [ -f "$GMS_PATH" ]; then
+      ui_print "- Copying installed microG GmsCore to system priv-app"
+      if [ ! -d "/my_bigball/priv-app/GmsCore" ]; then
+        mkdir -p "$MODPATH/system/product/priv-app/GmsCore"
+        cp "$GMS_PATH" "$MODPATH/system/product/priv-app/GmsCore/GmsCore.apk"
+      else
+        mkdir -p "$MODPATH/system/priv-app/microG"
+        cp "$GMS_PATH" "$MODPATH/system/priv-app/microG/microG.apk"
+      fi
+    fi
+  fi
+
+  DUMP_VD="$(pm dump com.android.vending 2>/dev/null)"
+  if [ -n "$DUMP_VD" ] && ! (echo "$DUMP_VD" | grep "Unable to find package: com.android.vending") >/dev/null; then
+    VD_PATH="$(realpath $(echo "$DUMP_VD" | grep path: | head -n1 | cut -d: -f2) 2>/dev/null)"
+    if [ -n "$VD_PATH" ] && [ -f "$VD_PATH" ]; then
+      if (echo "$DUMP_VD" | grep "android.permission.FAKE_PACKAGE_SIGNATURE") >/dev/null; then
+        ui_print "- Copying installed microG Companion to system priv-app"
+        pm grant com.android.vending android.permission.FAKE_PACKAGE_SIGNATURE 2>/dev/null
+      else
+        ui_print "- Copying installed Play Store to system priv-app"
+      fi
+      if ! [ -d "/my_bigball/priv-app/GmsCore" ]; then
+        mkdir -p "$MODPATH/system/product/priv-app/Phonesky"
+        cp "$VD_PATH" "$MODPATH/system/product/priv-app/Phonesky/Phonesky.apk"
+      else
+        mkdir -p "$MODPATH/system/priv-app/Phonesky"
+        cp "$VD_PATH" "$MODPATH/system/priv-app/Phonesky/Phonesky.apk"
+      fi
+    fi
+  fi
+}
+
+# -------------------------------------------------------------
+# Detection phase
+# -------------------------------------------------------------
+IS_MICROG_INSTALLED=false
+IS_OUR_MODULE_INSTALLED=false
+IS_OLD_REVIVED_INSTALLED=false
+IS_UPDATER_INSTALLED=false
+
+DUMP_GMS="$(pm dump com.google.android.gms 2>/dev/null)"
+if [ -n "$DUMP_GMS" ] && ! (echo "$DUMP_GMS" | grep "Unable to find package: com.google.android.gms") >/dev/null; then
+    IS_MICROG_INSTALLED=true
+fi
+
+PREV_PROP=""
+if [ -f "/data/adb/modules/microg_installer/module.prop" ]; then
+    PREV_PROP="$(cat /data/adb/modules/microg_installer/module.prop 2>/dev/null)"
+elif [ -n "$NVBASE" ] && [ -f "$NVBASE/modules/microg_installer/module.prop" ]; then
+    PREV_PROP="$(cat "$NVBASE/modules/microg_installer/module.prop" 2>/dev/null)"
+fi
+
+if [ -n "$PREV_PROP" ]; then
+    if echo "$PREV_PROP" | grep -E "microG Installer Next|306bobby-android" >/dev/null; then
+        IS_OUR_MODULE_INSTALLED=true
+    elif echo "$PREV_PROP" | grep -E "microG Installer Revived|nift4" >/dev/null; then
+        IS_OLD_REVIVED_INSTALLED=true
+    fi
+fi
+
+if pm path org.microg.installer.updater >/dev/null 2>&1 || \
+   [ -f "/data/adb/modules/microg_installer/system/priv-app/microGUpdater/microGUpdater.apk" ] || \
+   [ -f "/data/adb/modules/microg_installer/system/product/priv-app/microGUpdater/microGUpdater.apk" ]; then
+    IS_UPDATER_INSTALLED=true
+fi
+
+# -------------------------------------------------------------
+# Flow Execution
+# -------------------------------------------------------------
+if $IS_OUR_MODULE_INSTALLED; then
+    ui_print "- Existing microG Installer Next module detected."
+    perform_microg_copy
+    if $IS_UPDATER_INSTALLED; then
+        ui_print "- microG Updater app is already installed. Module updated."
+        install_updater_app
+    else
+        prompt_updater "Install microG Updater app to receive updates automatically?"
+    fi
+
+elif $IS_OLD_REVIVED_INSTALLED; then
+    ui_print "- Legacy microG Installer Revived module detected."
+    ui_print "- Replacing old module with microG Installer Next."
+    perform_microg_copy
+    prompt_updater "Install microG Updater app to continue receiving updates automatically?"
+
+elif $IS_MICROG_INSTALLED; then
+    ui_print "- Existing microG installation detected on device."
+    perform_microg_copy
+    prompt_updater "microG already detected! Install Updater app to receive updates automatically?"
+
+else
+    ui_print "- Clean installation detected (microG not installed)."
+    ui_print "- Note: The microG Updater app is required to update microG."
+    perform_microg_copy
+    prompt_updater "Install microG Updater app? (Required to update microG)"
 fi
 
 mmm_exec hideLoading
