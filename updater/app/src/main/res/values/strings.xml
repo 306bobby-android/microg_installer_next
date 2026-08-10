@@ -42,4 +42,20 @@
     <string name="notif_channel_name">microG Updates</string>
     <string name="notif_title">microG Update Available</string>
     <string name="notif_content">A new version of microG is available on GitHub.</string>
+
+    <!-- Setup Wizard Strings -->
+    <string name="setup_wizard_title">microG Services Setup</string>
+    <string name="setup_wizard_subtitle">Choose whether to install open-source microG Google services</string>
+    <string name="setup_gapps_detected_title">Google Play Services Detected</string>
+    <string name="setup_gapps_detected_desc">Official Google Apps were found on this system.</string>
+    <string name="setup_microg_detected_title">microG Pre-installed</string>
+    <string name="setup_microg_detected_desc">microG components are active on your system.</string>
+    <string name="setup_installing">Installing microG components…</string>
+    <string name="setup_downloading_gms">Downloading microG GmsCore (%1$d%%)</string>
+    <string name="setup_downloading_vending">Downloading microG Companion (%1$d%%)</string>
+    <string name="setup_complete_title">Setup Complete</string>
+    <string name="setup_complete_desc">microG has been successfully set up on your device.</string>
+    <string name="btn_finish_setup">Finish Setup</string>
+    <string name="btn_install_microg">Install microG</string>
+    <string name="btn_skip_microg">Skip microG Setup</string>
 </resources>
