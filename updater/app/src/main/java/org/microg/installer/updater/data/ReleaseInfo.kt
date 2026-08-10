@@ -5,5 +5,7 @@ data class ReleaseInfo(
     val gmsUrl: String?,
     val gmsVersionName: String?,
     val vendingUrl: String?,
-    val vendingVersionName: String?
+    val vendingVersionName: String?,
+    val auroraUrl: String? = null,
+    val auroraVersionName: String? = null
 )
