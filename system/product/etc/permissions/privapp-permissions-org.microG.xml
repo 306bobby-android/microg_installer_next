@@ -56,4 +56,11 @@
         <permission name="com.android.permission.USE_INSTALLER_V2" />
         <permission name="android.permission.WRITE_SECURE_SETTINGS" />
     </privapp-permissions>
+    <privapp-permissions package="org.microg.installer.updater">
+        <permission name="android.permission.INSTALL_PACKAGES" />
+        <permission name="android.permission.DELETE_PACKAGES" />
+        <permission name="android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION" />
+        <permission name="android.permission.START_ACTIVITIES_FROM_BACKGROUND" />
+        <permission name="android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST" />
+    </privapp-permissions>
 </permissions>

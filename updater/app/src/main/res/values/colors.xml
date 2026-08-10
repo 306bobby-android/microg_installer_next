@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#1E88E5</color>
+    <color name="primary_dark">#1565C0</color>
+    <color name="accent">#00E676</color>
+
+    <!-- Material3 Palette Tokens -->
+    <color name="md_theme_light_primary">#0061A4</color>
+    <color name="md_theme_light_onPrimary">#FFFFFF</color>
+    <color name="md_theme_light_primaryContainer">#D1E4FF</color>
+    <color name="md_theme_light_onPrimaryContainer">#001D36</color>
+    <color name="md_theme_light_surface">#F8FDFF</color>
+    <color name="md_theme_light_onSurface">#001F25</color>
+    <color name="md_theme_light_surfaceVariant">#DFE2EB</color>
+    <color name="md_theme_light_onSurfaceVariant">#43474E</color>
+    <color name="md_theme_light_background">#F8FDFF</color>
+    <color name="md_theme_light_onBackground">#001F25</color>
+    <color name="md_theme_light_outline">#73777F</color>
+
+    <color name="status_green">#2E7D32</color>
+    <color name="status_green_bg">#E8F5E9</color>
+    <color name="status_amber">#EF6C00</color>
+    <color name="status_amber_bg">#FFF3E0</color>
+</resources>

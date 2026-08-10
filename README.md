@@ -16,6 +16,18 @@ The repository for this project is located at [https://github.com/306bobby-andro
 - Install microG 0.3.2 and Companion (or real Play Store) as normal user app
 - Install the module to convert them to system apps with all bells and whistles (like Maps V1, GsfProxy, etc)
 
+## microG Updater App (Optional)
+
+During module installation in Magisk/KSU, you will be prompted via volume keys:
+- **Volume Up**: Install microG Updater app
+- **Volume Down**: Skip microG Updater app
+
+### Features of microG Updater:
+- **Material 3 Interface**: Clean UI displaying installed vs. latest GitHub release versions for GmsCore (`com.google.android.gms`) and Companion (`com.android.vending`).
+- **System Privileged Installer**: Uses `INSTALL_PACKAGES` system privilege to update microG components seamlessly.
+- **Auto-Check & Silent Updates**: Configurable background worker to periodically check for microG releases and auto-update or notify user.
+
+
 ## How do I get the real Play Store?
 
 First, if you experience an bootloop, use [Magisk Safe Mode](https://topjohnwu.github.io/Magisk/faq.html#q-i-installed-a-module-and-it-bootlooped-my-device-help) to disable the module and use an older Play Store APK, then post a bug report. This module needs to be updated for new Play Store versions every while. If it boots, but Play Store is broken, it's probably a microG issue. Feel free to report issues in the bugtracker here though.

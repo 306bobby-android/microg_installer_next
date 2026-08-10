@@ -93,4 +93,36 @@ else
   mkdir -p "$MODPATH/system/priv-app/Phonesky"
   cp "$VD_PATH" "$MODPATH/system/priv-app/Phonesky/Phonesky.apk"
 fi
+
+keycheck() {
+  local num=""
+  while true; do
+    num=$(getevent -l -c 1 2>&1 | grep -E 'KEY_VOLUMEUP|KEY_VOLUMEDOWN')
+    if echo "$num" | grep -q 'KEY_VOLUMEUP'; then
+      return 0
+    elif echo "$num" | grep -q 'KEY_VOLUMEDOWN'; then
+      return 1
+    fi
+  done
+}
+
+ui_print "*************************************************"
+ui_print " Install microG Updater app?"
+ui_print "   Vol Up   = Yes"
+ui_print "   Vol Down = No"
+ui_print "*************************************************"
+if keycheck; then
+  ui_print "- Installing microG Updater app"
+  if [ ! -d "/my_bigball/priv-app/GmsCore" ]; then
+    mkdir -p "$MODPATH/system/product/priv-app/microGUpdater"
+    cp -f "$ZIPFILE_PATH/system/product/priv-app/microGUpdater/microGUpdater.apk" "$MODPATH/system/product/priv-app/microGUpdater/microGUpdater.apk" 2>/dev/null || true
+  else
+    mkdir -p "$MODPATH/system/priv-app/microGUpdater"
+    cp -f "$ZIPFILE_PATH/system/priv-app/microGUpdater/microGUpdater.apk" "$MODPATH/system/priv-app/microGUpdater/microGUpdater.apk" 2>/dev/null || true
+  fi
+else
+  ui_print "- Skipping microG Updater app installation"
+  rm -rf "$MODPATH/system/priv-app/microGUpdater" "$MODPATH/system/product/priv-app/microGUpdater" 2>/dev/null || true
+fi
+
 mmm_exec hideLoading
