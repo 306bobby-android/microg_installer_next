@@ -1,24 +1,17 @@
-name: Build and Release
+name: Trusted CI
 
 on:
   push:
     branches:
       - master
       - main
-    tags:
-      - 'v*'
-  pull_request:
-    branches:
-      - master
-      - main
+    tags-ignore:
+      - '*'
 
 jobs:
   build:
-    name: Build Module
+    name: Build Trusted CI
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: write
 
     steps:
       - name: Checkout repository
@@ -50,31 +43,8 @@ jobs:
         run: |
           zip -9r microG_Installer_Next.zip META-INF system customize.sh module.prop README.md CHANGELOG androidacy-config.json LICENSE -x "*.git*" "updater/*"
 
-      # Trusted CI: Built on push to master/main
       - name: Upload Trusted CI Artifact
-        if: github.event_name == 'push' && !startsWith(github.ref, 'refs/tags/')
         uses: actions/upload-artifact@v4
         with:
           name: Trusted CI - microG_Installer_Next
           path: microG_Installer_Next.zip
-
-      # Untrusted CI: Built on pull requests
-      - name: Upload Untrusted CI Artifact
-        if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@v4
-        with:
-          name: Untrusted CI - microG_Installer_Next
-          path: microG_Installer_Next.zip
-
-      # Version Release: Triggered on version tags (e.g. v4.2.0-0)
-      - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
-        with:
-          name: microG Installer Next ${{ github.ref_name }}
-          body_path: CHANGELOG
-          files: |
-            microG_Installer_Next.zip
-            update.json
-          draft: false
-          prerelease: false
