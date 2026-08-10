@@ -10,6 +10,8 @@
     <string name="gmscore_package">com.google.android.gms</string>
     <string name="vending_title">microG Companion / Store</string>
     <string name="vending_package">com.android.vending</string>
+    <string name="aurora_title">Aurora Store</string>
+    <string name="aurora_package">com.aurora.store</string>
 
     <string name="installed_version">Installed: %1$s</string>
     <string name="latest_version">Latest: %1$s</string>

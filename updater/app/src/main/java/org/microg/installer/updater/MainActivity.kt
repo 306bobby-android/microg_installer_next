@@ -2,7 +2,6 @@ package org.microg.installer.updater
 
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -51,6 +50,13 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        binding.btnUpdateAurora.setOnClickListener {
+            val url = currentRelease?.auroraUrl
+            if (url != null) {
+                installComponent(url, "com.aurora.store", binding.btnUpdateAurora)
+            }
+        }
+
         UpdateWorker.scheduleWork(this)
         refreshInstalledVersions()
         checkForUpdates()
@@ -74,9 +80,11 @@ class MainActivity : AppCompatActivity() {
     private fun refreshInstalledVersions() {
         val gmsVer = getInstalledVersion("com.google.android.gms") ?: "Not installed"
         val vendingVer = getInstalledVersion("com.android.vending") ?: "Not installed"
+        val auroraVer = getInstalledVersion("com.aurora.store") ?: "Not installed"
 
         binding.gmsInstalledVer.text = getString(R.string.installed_version, gmsVer)
         binding.vendingInstalledVer.text = getString(R.string.installed_version, vendingVer)
+        binding.auroraInstalledVer.text = getString(R.string.installed_version, auroraVer)
     }
 
     private fun getInstalledVersion(packageName: String): String? {
@@ -99,23 +107,26 @@ class MainActivity : AppCompatActivity() {
 
             if (release == null) {
                 binding.statusTitle.text = "Failed to connect"
-                binding.statusSubtitle.text = "Could not check GitHub releases."
-                Toast.makeText(this@MainActivity, "Failed to check GitHub releases", Toast.LENGTH_SHORT).show()
+                binding.statusSubtitle.text = "Could not check component releases."
+                Toast.makeText(this@MainActivity, "Failed to check release updates", Toast.LENGTH_SHORT).show()
                 return@launch
             }
 
             binding.gmsLatestVer.text = getString(R.string.latest_version, release.gmsVersionName ?: "N/A")
             binding.vendingLatestVer.text = getString(R.string.latest_version, release.vendingVersionName ?: "N/A")
+            binding.auroraLatestVer.text = getString(R.string.latest_version, release.auroraVersionName ?: "N/A")
 
             val gmsInstalled = getInstalledVersion("com.google.android.gms")
             val vendingInstalled = getInstalledVersion("com.android.vending")
+            val auroraInstalled = getInstalledVersion("com.aurora.store")
 
             val gmsNeedsUpdate = release.gmsUrl != null && (gmsInstalled == null || gmsInstalled != release.gmsVersionName)
             val vendingNeedsUpdate = release.vendingUrl != null && (vendingInstalled == null || vendingInstalled != release.vendingVersionName)
+            val auroraNeedsUpdate = release.auroraUrl != null && (auroraInstalled == null || auroraInstalled != release.auroraVersionName)
 
             if (gmsNeedsUpdate) {
                 binding.btnUpdateGms.isEnabled = true
-                binding.btnUpdateGms.text = getString(R.string.btn_update)
+                binding.btnUpdateGms.text = if (gmsInstalled == null) getString(R.string.btn_install) else getString(R.string.btn_update)
             } else {
                 binding.btnUpdateGms.isEnabled = false
                 binding.btnUpdateGms.text = getString(R.string.btn_up_to_date)
@@ -123,21 +134,29 @@ class MainActivity : AppCompatActivity() {
 
             if (vendingNeedsUpdate) {
                 binding.btnUpdateVending.isEnabled = true
-                binding.btnUpdateVending.text = getString(R.string.btn_update)
+                binding.btnUpdateVending.text = if (vendingInstalled == null) getString(R.string.btn_install) else getString(R.string.btn_update)
             } else {
                 binding.btnUpdateVending.isEnabled = false
                 binding.btnUpdateVending.text = getString(R.string.btn_up_to_date)
             }
 
-            if (gmsNeedsUpdate || vendingNeedsUpdate) {
+            if (auroraNeedsUpdate) {
+                binding.btnUpdateAurora.isEnabled = true
+                binding.btnUpdateAurora.text = if (auroraInstalled == null) getString(R.string.btn_install) else getString(R.string.btn_update)
+            } else {
+                binding.btnUpdateAurora.isEnabled = false
+                binding.btnUpdateAurora.text = getString(R.string.btn_up_to_date)
+            }
+
+            if (gmsNeedsUpdate || vendingNeedsUpdate || auroraNeedsUpdate) {
                 binding.statusTitle.text = getString(R.string.status_update_available)
-                binding.statusSubtitle.text = "New release v${release.tagName} is available."
+                binding.statusSubtitle.text = "New component updates are available."
                 binding.statusCard.setCardBackgroundColor(ContextCompat.getColor(this@MainActivity, R.color.status_amber_bg))
                 binding.statusTitle.setTextColor(ContextCompat.getColor(this@MainActivity, R.color.status_amber))
                 binding.statusIcon.setColorFilter(ContextCompat.getColor(this@MainActivity, R.color.status_amber))
             } else {
                 binding.statusTitle.text = getString(R.string.status_up_to_date)
-                binding.statusSubtitle.text = "Installed microG components are at the latest version."
+                binding.statusSubtitle.text = "Installed microG & Aurora Store components are up to date."
                 binding.statusCard.setCardBackgroundColor(ContextCompat.getColor(this@MainActivity, R.color.status_green_bg))
                 binding.statusTitle.setTextColor(ContextCompat.getColor(this@MainActivity, R.color.status_green))
                 binding.statusIcon.setColorFilter(ContextCompat.getColor(this@MainActivity, R.color.status_green))

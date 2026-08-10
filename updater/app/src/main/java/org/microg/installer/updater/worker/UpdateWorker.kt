@@ -30,11 +30,13 @@ class UpdateWorker(
 
         val gmsVersion = getInstalledVersion("com.google.android.gms")
         val vendingVersion = getInstalledVersion("com.android.vending")
+        val auroraVersion = getInstalledVersion("com.aurora.store")
 
         val gmsNeedsUpdate = release.gmsUrl != null && isNewerVersion(gmsVersion, release.gmsVersionName)
         val vendingNeedsUpdate = release.vendingUrl != null && isNewerVersion(vendingVersion, release.vendingVersionName)
+        val auroraNeedsUpdate = release.auroraUrl != null && isNewerVersion(auroraVersion, release.auroraVersionName)
 
-        if (gmsNeedsUpdate || vendingNeedsUpdate) {
+        if (gmsNeedsUpdate || vendingNeedsUpdate || auroraNeedsUpdate) {
             val autoInstall = prefs.getBoolean("auto_install_updates", false)
             if (autoInstall) {
                 if (gmsNeedsUpdate && release.gmsUrl != null) {
@@ -42,6 +44,9 @@ class UpdateWorker(
                 }
                 if (vendingNeedsUpdate && release.vendingUrl != null) {
                     SystemInstaller.downloadAndInstall(context, release.vendingUrl, "com.android.vending") {}
+                }
+                if (auroraNeedsUpdate && release.auroraUrl != null) {
+                    SystemInstaller.downloadAndInstall(context, release.auroraUrl, "com.aurora.store") {}
                 }
             } else {
                 showNotification(context, release.tagName)
@@ -90,7 +95,7 @@ class UpdateWorker(
         val notification = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(android.R.drawable.stat_sys_download_done)
             .setContentTitle(context.getString(R.string.notif_title))
-            .setContentText("microG release v$versionTag is available.")
+            .setContentText("Updates for microG / Aurora Store components are available.")
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .build()
