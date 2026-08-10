@@ -40,20 +40,4 @@
     <string name="notif_channel_name">microG Updates</string>
     <string name="notif_title">microG Update Available</string>
     <string name="notif_content">A new version of microG is available on GitHub.</string>
-
-    <!-- Setup Wizard Strings -->
-    <string name="setup_wizard_title">microG Services</string>
-    <string name="setup_wizard_subtitle">Open-source replacement for Google Play Services with enhanced privacy and battery life.</string>
-    <string name="setup_gapps_detected_title">Google Play Services Detected</string>
-    <string name="setup_gapps_detected_desc">Official Google Play Services (GApps) is already installed on this system. microG setup is skipped.</string>
-    <string name="setup_microg_detected_title">microG is Ready</string>
-    <string name="setup_microg_detected_desc">microG GmsCore and Companion are already installed and configured on your device.</string>
-    <string name="btn_install_microg">Install microG Services</string>
-    <string name="btn_skip_microg">Skip Setup</string>
-    <string name="btn_finish_setup">Next / Finish</string>
-    <string name="setup_downloading_gms">Downloading microG GmsCore… (%1$d%%)</string>
-    <string name="setup_downloading_vending">Downloading microG Companion… (%1$d%%)</string>
-    <string name="setup_installing">Installing system components…</string>
-    <string name="setup_complete_title">microG Successfully Installed</string>
-    <string name="setup_complete_desc">microG GmsCore and Companion have been installed into system priv-app.</string>
 </resources>
