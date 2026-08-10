@@ -35,6 +35,18 @@
             android:label="@string/settings_title"
             android:parentActivityName=".MainActivity" />
 
+        <activity
+            android:name=".SetupWizardActivity"
+            android:exported="true"
+            android:label="@string/setup_wizard_title"
+            android:theme="@style/Theme.MicroGUpdater">
+            <intent-filter>
+                <action android:name="org.microg.installer.updater.SETUP_WIZARD" />
+                <action android:name="com.android.wizard.LINEAGE_SETUP_WIZARD" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="org.microg.installer.updater.provider"
