@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageInstaller
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import androidx.core.content.FileProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -83,7 +84,6 @@ object SystemInstaller {
 
             val installed = installApk(context, destinationFile, packageName)
             if (!installed) {
-                // Fallback to FileProvider package installer intent
                 fallbackInstallIntent(context, destinationFile)
             }
             true
@@ -94,6 +94,13 @@ object SystemInstaller {
     }
 
     private fun installApk(context: Context, apkFile: File, packageName: String): Boolean {
+        // 1. Silent shell pm install (using root / system shell execution)
+        if (installSilentlyViaPm(apkFile)) {
+            Log.d("microGInstaller", "Silent pm install succeeded for $packageName")
+            return true
+        }
+
+        // 2. System PackageInstaller session API
         val packageInstaller = context.packageManager.packageInstaller
         val params = PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL)
         params.setAppPackageName(packageName)
@@ -133,6 +140,31 @@ object SystemInstaller {
             }
             e.printStackTrace()
             return false
+        }
+    }
+
+    private fun installSilentlyViaPm(apkFile: File): Boolean {
+        return try {
+            val commands = arrayOf(
+                arrayOf("su", "-c", "pm install -r -d --user 0 \"${apkFile.absolutePath}\""),
+                arrayOf("pm", "install", "-r", "-d", "--user", "0", apkFile.absolutePath),
+                arrayOf("pm", "install", "-r", "-d", apkFile.absolutePath)
+            )
+
+            for (cmd in commands) {
+                try {
+                    val process = Runtime.getRuntime().exec(cmd)
+                    val exitCode = process.waitFor()
+                    val output = process.inputStream.bufferedReader().readText() + process.errorStream.bufferedReader().readText()
+                    if (exitCode == 0 || output.contains("Success", ignoreCase = true)) {
+                        return true
+                    }
+                } catch (_: Exception) {}
+            }
+            false
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
         }
     }
 
