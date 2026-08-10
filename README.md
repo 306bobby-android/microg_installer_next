@@ -1,15 +1,14 @@
-# microG Installer Revived
+# microG Installer Next
 
 > **Notice**: This project officially only supports AOSP/Lineage-based ROMs with signature spoofing disabled. Other setups may work, but your mileage may vary (YMMV).
 
-
-This is a Magisk module - originally based on Hieu Van's microG Installer - that installs microG GmsCore, GsfProxy and Companion (or Play Store if you want so) to `/system/priv-app`.
+This is a Magisk module - originally based on Hieu Van's microG Installer and nift4's microG Installer Revived - that installs microG GmsCore, GsfProxy and Companion (or Play Store if you want so) to `/system/priv-app`.
 
 Currently, GmsCore 0.3.4 (including Companion, previously known as FakeStore) and earlier are supported. GsfProxy 0.1.0 and MapsV1 0.1.0 are bundled in the module.
 
 **Note**: Install this module before installing any GMS-dependent apps, as well as do not disable it after installing such apps, unless you know what you're doing.
 
-There are two copies of this online: The [Magisk alt module repo](https://github.com/Magisk-Modules-Alt-Repo/microG_Installer) and the [personal](https://github.com/nift4/microg_installer) one. The personal one contains the latest development version and is used for pull requests and issues and the Magisk alt repo one is the stable code only.
+The repository for this project is located at [https://github.com/306bobby-android/microg_installer_next](https://github.com/306bobby-android/microg_installer_next).
 
 ## Installation
 **Again, if you have Google services currently installed, DO NOT INSTALL THIS MODULE.**
@@ -21,7 +20,7 @@ There are two copies of this online: The [Magisk alt module repo](https://github
 
 First, if you experience an bootloop, use [Magisk Safe Mode](https://topjohnwu.github.io/Magisk/faq.html#q-i-installed-a-module-and-it-bootlooped-my-device-help) to disable the module and use an older Play Store APK, then post a bug report. This module needs to be updated for new Play Store versions every while. If it boots, but Play Store is broken, it's probably a microG issue. Feel free to report issues in the bugtracker here though.
 
-Get an Play Store APK (I suggest unpatched Play Store from APKMirror) - please note that the file has to be a non-bundle APK, which means APKM files are not supported. Then, just install it before flashing the module! If you now install, update or reflash microG Installer Revived there will be an message "Installing real Play Store". This indicates it worked. Now grant all permissions. You can now install updates for the Play Store like for every app.
+Get an Play Store APK (I suggest unpatched Play Store from APKMirror) - please note that the file has to be a non-bundle APK, which means APKM files are not supported. Then, just install it before flashing the module! If you now install, update or reflash microG Installer Next there will be an message "Installing real Play Store". This indicates it worked. Now grant all permissions. You can now install updates for the Play Store like for every app.
 
 Note: previously, this module told you to put it into `/data/adb/Phonesky.apk`. This is no longer needed and the module will ignore that file.
 
@@ -41,19 +40,21 @@ Note: previously, this module told you to put it into `/data/adb/Phonesky.apk`. 
 ### Linux, BSD, macOS, Android
 Requires wget.
 
-    wget -O META-INF/com/google/android/update-binary https://raw.githubusercontent.com/topjohnwu/Magisk/master/scripts/module_installer.sh && zip microG_Installer_Revived.zip -9r * -x update.json
+    wget -O META-INF/com/google/android/update-binary https://raw.githubusercontent.com/topjohnwu/Magisk/master/scripts/module_installer.sh && zip microG_Installer_Next.zip -9r * -x update.json
 
 
 ### Other
 Download [this](https://raw.githubusercontent.com/topjohnwu/Magisk/master/scripts/module_installer.sh) and put it into `META-INF/com/google/android/update-binary`. And ZIP it.
 
 ### About microGOverlay.apk
-This APK file is an simple overlay containing configuration for UnifiedNlp. The source can not be checked in into this git repository because of compatibility reasons with module repositories, so I posted the trivial source code on [an extra branch](https://github.com/nift4/microg_installer_revived/tree/overlay). You can use any signing keystore to sign the overlay, but it needs to be signed.
+This APK file is an simple overlay containing configuration for UnifiedNlp. The source can not be checked in into this git repository because of compatibility reasons with module repositories, so I posted the trivial source code on [an extra branch](https://github.com/306bobby-android/microg_installer_next/tree/overlay). You can use any signing keystore to sign the overlay, but it needs to be signed.
 
 ## Credits
 
 - **microG project** for their awesome work
-- **Hieu Van** for the [original microG Installer](https://github.com/nift4/microg_installer_revived/tree/23de13101d8dd5807f713d0cace4a565478c6cfd)
+- **nift4** for [microG Installer Revived](https://github.com/nift4/microg_installer_revived)
+- **Hieu Van** for the original microG Installer
 - **Fs00** for many bug fixes
 - **chris42** and **FriendlyNeighborhoodShane** for privapp permission files
 - **felinira**, **akaessens** and **soracqt** for contributing through pull requests
+

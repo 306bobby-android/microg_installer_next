@@ -9,7 +9,7 @@ fi
 if ! $BOOTMODE; then
     abort "- ERROR: Installation via recovery is NOT supported."
 fi
-mmm_exec setSupportLink "https://github.com/nift4/microg_installer_revived/issues"
+mmm_exec setSupportLink "https://github.com/306bobby-android/microg_installer_next/issues"
 
 MAX_VER="240913008"
 MAX_VERN="0.3.4.240913"
