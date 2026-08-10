@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.microg.installer.updater.data.ReleaseChecker
 import org.microg.installer.updater.data.ReleaseInfo
@@ -176,8 +177,11 @@ class MainActivity : AppCompatActivity() {
             }
 
             if (success) {
-                Toast.makeText(this@MainActivity, "Install request submitted", Toast.LENGTH_SHORT).show()
+                button.text = "Installing..."
+                Toast.makeText(this@MainActivity, "Installation submitted", Toast.LENGTH_SHORT).show()
+                delay(3500)
                 refreshInstalledVersions()
+                checkForUpdates()
             } else {
                 Toast.makeText(this@MainActivity, "Installation failed", Toast.LENGTH_SHORT).show()
                 button.isEnabled = true

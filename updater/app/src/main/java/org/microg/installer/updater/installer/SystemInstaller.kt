@@ -15,6 +15,7 @@ import java.io.FileOutputStream
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.concurrent.TimeUnit
 
 object SystemInstaller {
 
@@ -60,6 +61,7 @@ object SystemInstaller {
             }
 
             if (responseCode != 200) {
+                Log.e("microGInstaller", "Download failed with HTTP code $responseCode")
                 return@withContext false
             }
 
@@ -94,16 +96,46 @@ object SystemInstaller {
     }
 
     private fun installApk(context: Context, apkFile: File, packageName: String): Boolean {
-        // 1. Silent shell pm install (using root / system shell execution)
+        // 1. Try non-blocking silent shell pm install
         if (installSilentlyViaPm(apkFile)) {
             Log.d("microGInstaller", "Silent pm install succeeded for $packageName")
             return true
         }
 
-        // 2. System PackageInstaller session API
+        // 2. Try privileged PackageInstaller session API
+        return installViaPackageInstaller(context, apkFile, packageName)
+    }
+
+    private fun installSilentlyViaPm(apkFile: File): Boolean {
+        val commands = arrayOf(
+            arrayOf("su", "-c", "pm install -r -d --user 0 \"${apkFile.absolutePath}\""),
+            arrayOf("su", "0", "pm", "install", "-r", "-d", apkFile.absolutePath)
+        )
+
+        for (cmd in commands) {
+            try {
+                val process = ProcessBuilder(*cmd).redirectErrorStream(true).start()
+                val completed = process.waitFor(5, TimeUnit.SECONDS)
+                if (completed) {
+                    val output = process.inputStream.bufferedReader().readText()
+                    if (process.exitValue() == 0 || output.contains("Success", ignoreCase = true)) {
+                        return true
+                    }
+                } else {
+                    process.destroyForcibly()
+                }
+            } catch (_: Exception) {}
+        }
+        return false
+    }
+
+    private fun installViaPackageInstaller(context: Context, apkFile: File, packageName: String): Boolean {
         val packageInstaller = context.packageManager.packageInstaller
         val params = PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL)
         params.setAppPackageName(packageName)
+        try {
+            params.setInstallerPackageName(context.packageName)
+        } catch (_: Exception) {}
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             params.setRequireUserAction(PackageInstaller.SessionParams.USER_ACTION_NOT_REQUIRED)
@@ -121,7 +153,9 @@ object SystemInstaller {
                 session.fsync(out)
             }
 
-            val intent = Intent(context, InstallerResultReceiver::class.java)
+            val intent = Intent(context, InstallerResultReceiver::class.java).apply {
+                putExtra("target_package_name", packageName)
+            }
             val pendingIntent = PendingIntent.getBroadcast(
                 context,
                 sessionId,
@@ -140,31 +174,6 @@ object SystemInstaller {
             }
             e.printStackTrace()
             return false
-        }
-    }
-
-    private fun installSilentlyViaPm(apkFile: File): Boolean {
-        return try {
-            val commands = arrayOf(
-                arrayOf("su", "-c", "pm install -r -d --user 0 \"${apkFile.absolutePath}\""),
-                arrayOf("pm", "install", "-r", "-d", "--user", "0", apkFile.absolutePath),
-                arrayOf("pm", "install", "-r", "-d", apkFile.absolutePath)
-            )
-
-            for (cmd in commands) {
-                try {
-                    val process = Runtime.getRuntime().exec(cmd)
-                    val exitCode = process.waitFor()
-                    val output = process.inputStream.bufferedReader().readText() + process.errorStream.bufferedReader().readText()
-                    if (exitCode == 0 || output.contains("Success", ignoreCase = true)) {
-                        return true
-                    }
-                } catch (_: Exception) {}
-            }
-            false
-        } catch (e: Exception) {
-            e.printStackTrace()
-            false
         }
     }
 
