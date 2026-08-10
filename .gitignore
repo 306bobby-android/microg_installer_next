@@ -5,3 +5,7 @@ microG_Installer_Revived.zip
 updater/.gradle
 updater/build
 updater/app/build
+system/priv-app/microG/
+system/product/priv-app/GmsCore/
+system/priv-app/Phonesky/
+system/product/priv-app/Phonesky/

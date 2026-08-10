@@ -1,7 +1,5 @@
 # microG Installer Next
 
-[![Trusted CI](https://img.shields.io/badge/Download-Trusted%20CI-238636?style=for-the-badge&logo=github&logoColor=white)](https://nightly.link/306bobby-android/microg_installer_next/workflows/trusted-ci/master?preview)
-
 > **Notice**: This project officially only supports AOSP/Lineage-based ROMs with signature spoofing enabled. Other setups may work, but your mileage may vary (YMMV).
 
 `microG Installer Next` is a Magisk / KernelSU / APatch module — based on Hieu Van's microG Installer and nift4's microG Installer Revived — that seamlessly installs microG GmsCore, GsfProxy, MapsV1, Companion (or real Play Store), and the microG Updater app directly to system privileged paths (`/system/priv-app` or `/system/product/priv-app`).
@@ -25,7 +23,7 @@ The repository for this project is located at [https://github.com/306bobby-andro
 > **WARNING**: If you have official Google Play Services (GApps) currently installed on your ROM, **DO NOT INSTALL THIS MODULE**.
 
 1. Choose a solution for [Signature Spoofing](https://github.com/microg/android_packages_apps_GmsCore/wiki/Signature-Spoofing) if your ROM does not have signature spoofing built-in (e.g. [whew-inc's FakeGApps fork](https://github.com/whew-inc/FakeGApps/releases)).
-2. Flash `microG_Installer_Next.zip` in your root manager (Magisk, KernelSU, or APatch).
+2. Flash `microG_Installer_Next.zip` in your root manager (Magisk, KernelSU, or APatch). [![Trusted CI](https://img.shields.io/badge/Download-Trusted%20CI-238636?style=for-the-badge&logo=github&logoColor=white)](https://nightly.link/306bobby-android/microg_installer_next/workflows/trusted-ci/master?preview)
 3. Reboot your device.
 4. Open the **microG Updater** app to complete installing microG GmsCore and Companion, or to manage automatic background updates.
 
