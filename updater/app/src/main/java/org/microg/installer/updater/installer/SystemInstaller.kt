@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageInstaller
 import android.net.Uri
 import android.os.Build
+import androidx.core.content.FileProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -28,11 +29,38 @@ object SystemInstaller {
                 destinationFile.delete()
             }
 
-            val url = URL(apkUrl)
-            val connection = url.openConnection() as HttpURLConnection
-            connection.connectTimeout = 15000
-            connection.readTimeout = 15000
-            connection.connect()
+            var currentUrl = apkUrl
+            var connection: HttpURLConnection
+            var responseCode: Int
+            var redirects = 0
+
+            while (true) {
+                val url = URL(currentUrl)
+                connection = url.openConnection() as HttpURLConnection
+                connection.instanceFollowRedirects = true
+                connection.connectTimeout = 15000
+                connection.readTimeout = 15000
+                connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 14)")
+                connection.connect()
+
+                responseCode = connection.responseCode
+                if (responseCode == HttpURLConnection.HTTP_MOVED_PERM ||
+                    responseCode == HttpURLConnection.HTTP_MOVED_TEMP ||
+                    responseCode == HttpURLConnection.HTTP_SEE_OTHER ||
+                    responseCode == 307 || responseCode == 308) {
+                    val loc = connection.getHeaderField("Location")
+                    if (loc != null && redirects < 5) {
+                        currentUrl = loc
+                        redirects++
+                        continue
+                    }
+                }
+                break
+            }
+
+            if (responseCode != 200) {
+                return@withContext false
+            }
 
             val fileLength = connection.contentLength
             val inputStream: InputStream = connection.inputStream
@@ -53,7 +81,12 @@ object SystemInstaller {
             outputStream.close()
             inputStream.close()
 
-            installApk(context, destinationFile, packageName)
+            val installed = installApk(context, destinationFile, packageName)
+            if (!installed) {
+                // Fallback to FileProvider package installer intent
+                fallbackInstallIntent(context, destinationFile)
+            }
+            true
         } catch (e: Exception) {
             e.printStackTrace()
             false
@@ -100,6 +133,24 @@ object SystemInstaller {
             }
             e.printStackTrace()
             return false
+        }
+    }
+
+    private fun fallbackInstallIntent(context: Context, apkFile: File) {
+        try {
+            val apkUri: Uri = FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.provider",
+                apkFile
+            )
+            val installIntent = Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(apkUri, "application/vnd.android.package-archive")
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(installIntent)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 }
